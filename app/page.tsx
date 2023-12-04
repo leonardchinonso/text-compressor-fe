@@ -1,5 +1,11 @@
+import Hero from "@/components/Hero";
+import GradientWrapper from "@/components/GradientWrapper";
+
 export default function Home() {
   return (
-    <div></div>
+      <>
+        <Hero />
+        <GradientWrapper/>
+      </>
   )
 }
