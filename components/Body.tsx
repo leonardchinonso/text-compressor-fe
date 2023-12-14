@@ -16,19 +16,19 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useCallback, useEffect, useState } from 'react';
-// import { AlertCircle } from 'lucide-react';
-// import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import LoadingDots from '@/components/ui/loadingdots';
 import { Algorithm } from '@/components/Algorithm';
 import { useRouter } from 'next/navigation';
 import {router} from "next/client";
 import {BenchmarkRequest, BenchmarkResponse} from "@/utils/service";
 import {HuffmanEncoding, Algorithms} from "@/utils/utils";
+import { json } from 'stream/consumers';
 // import { toast, Toaster } from 'react-hot-toast';
 
 const generateFormSchema = z.object({
-  path: z.string().min(1),
-  algorithm: z.string().min(3).max(160),
+  text: z.string().min(1),
 });
 
 type GenerateFormValues = z.infer<typeof generateFormSchema>;
@@ -46,9 +46,9 @@ const Body = ({
   modelLatency?: number;
   id?: string;
 }) => {
+  const [responseData, setResponseData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [chosenAlgorithm, setChosenAlgorithm] = useState(HuffmanEncoding);
-  // const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   const [response, setResponse] = useState<BenchmarkResponse | null>(null);
   // const [submittedURL, setSubmittedURL] = useState<string | null>(null);
 
@@ -60,32 +60,64 @@ const Body = ({
 
     // Set default values so that the form inputs are controlled components.
     defaultValues: {
-      path: '',
-      algorithm: '',
+      text: '',
     },
   });
 
   // useEffect(() => {
-  //   if (imageUrl && prompt && redirectUrl && modelLatency && id) {
-  //     setResponse({
-  //       image_url: imageUrl,
-  //       model_latency_ms: modelLatency,
-  //       id: id,
-  //     });
-  //     // setSubmittedURL(redirectUrl);
-  //
-  //     form.setValue('algorithm', prompt);
-  //     form.setValue('path', redirectUrl);
-  //   }
-  // }, [imageUrl, modelLatency, prompt, redirectUrl, id, form]);
+  //   const url = '/api/generate';
 
-  const handleAlgorithmClick = useCallback(
-    (algorithm: string) => {
-      form.setValue('algorithm', algorithm);
-      setChosenAlgorithm(algorithm);
-    },
-    [form],
-  );
+  //   const singleThreadRequest: BenchmarkRequest = {
+  //     text: values.text,
+  //     multithread: false,
+  //   }
+
+  //   // handleSubmit handles the submit event of the form
+  //     const handleSubmit = useCallback(
+  //       async (values: GenerateFormValues) => {
+  //         // set the defaults for all values
+  //         setIsLoading(true);
+  //         setResponse(null);
+
+  //         try {
+  //           // create a request for the benchmarking
+  //           const request: BenchmarkRequest = {
+  //             text: values.text,
+  //             multithread: false,
+  //           };
+  //           const response = await fetch('/api/generate', {
+  //             method: 'POST',
+  //             body: JSON.stringify(request),
+  //           });
+
+  //           // Handle API errors.
+  //         if (!response.ok || response.status !== 200) {
+  //           const text = await response.text();
+  //           throw new Error(
+  //             `Failed to retrieve benchmark metrics: ${response.status}, ${text}`,
+  //           );
+  //         }
+
+  //         const data = await response.json();
+  //         setResponseData(data);
+
+  //         console.log("DATA: ", data);
+
+  //         router.push({
+  //           pathname: '/result',
+  //         });
+  //         } catch(error) {
+  //           if (error instanceof Error) {
+  //             setError(error);
+  //           }
+  //         }
+  //         finally {
+  //           setIsLoading(false);
+  //         }
+  //       },
+  //       [router],
+  //   );
+  // }, []);
 
   // handleSubmit handles the submit event of the form
   const handleSubmit = useCallback(
@@ -94,25 +126,52 @@ const Body = ({
         setIsLoading(true);
         setResponse(null);
 
-        // create a request for the benchmarking
-        const request: BenchmarkRequest = {
-          file_path: values.path,
-          algorithm: values.algorithm,
-        };
+        try {
+          // create a request for the benchmarking
+          const request: BenchmarkRequest = {
+            text: values.text,
+            multithread: false,
+          };
+          const response = await fetch('/api/generate', {
+            method: 'POST',
+            body: JSON.stringify(request),
+          });
 
-        // get the response from the api call
-        console.log(request);
-        const response: BenchmarkResponse = {
-          bit_rate: "10",
-          compression_ratio: "0.34",
-        };
+          // Handle API errors.
+        if (!response.ok || response.status !== 200) {
+          const text = await response.text();
+          throw new Error(
+            `Failed to retrieve benchmark metrics: ${response.status}, ${text}`,
+          );
+        }
 
-        // Handle API errors from response
+        const data = await response.json();
+        setResponseData(data);
+
+        console.log("DATA: ", data);
+
+        // router.push({
+        //   pathname: '/result',
+        // });
         router.push('/result');
-        setIsLoading(false);
+        } catch(error) {
+          if (error instanceof Error) {
+            setError(error);
+          }
+        }
+        finally {
+          setIsLoading(false);
+        }
       },
+
       [router],
   );
+
+  // const handleSubmit = useCallback(
+  //   async () => {
+  //     router.push('/result')
+  //   }, [router]
+  // );
 
   return (
     <div className="light flex justify-center items-center flex-col w-full lg:p-0 p-4 sm:mb-28 mb-0">
@@ -124,30 +183,17 @@ const Body = ({
               <div className="flex flex-col gap-4">
                 <FormField
                   control={form.control}
-                  name="path"
+                  name="text"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>File path</FormLabel>
+                      <FormLabel>Input Text</FormLabel>
                       <FormControl>
-                        <Input placeholder="user/leonard/chinonso/bible.txt" {...field} />
+                        <Input placeholder="Lorem Ipsum..." {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <div className="my-2">
-                  <p className="text-sm font-medium mb-3">Pick one algorithm</p>
-                  <div className="grid sm:grid-cols-2 grid-cols-1 gap-3 text-center text-gray-500 text-sm">
-                    {Algorithms.map((algorithm) => (
-                      <Algorithm
-                        key={algorithm}
-                        algorithm={algorithm}
-                        onClick={() => handleAlgorithmClick(algorithm)}
-                        disabled={chosenAlgorithm == algorithm}
-                      />
-                    ))}
-                  </div>
-                </div>
                 <Button
                   type="submit"
                   disabled={isLoading}
@@ -163,13 +209,13 @@ const Body = ({
                   )}
                 </Button>
 
-                {/*{error && (*/}
-                {/*  <Alert variant="destructive">*/}
-                {/*    <AlertCircle className="h-4 w-4" />*/}
-                {/*    <AlertTitle>Error</AlertTitle>*/}
-                {/*    <AlertDescription>{error.message}</AlertDescription>*/}
-                {/*  </Alert>*/}
-                {/*)}*/}
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>{error.message}</AlertDescription>
+                  </Alert>
+                )}
               </div>
             </form>
           </Form>
