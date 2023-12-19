@@ -11,6 +11,7 @@ import {
 } from "@nextui-org/react";
 import {Tabs, Tab, Switch, Card, CardBody} from "@nextui-org/react";
 import BarChart from "@/components/BarChart";
+import { useEffect } from "react";
 
 const rowsSingle = [
   {
@@ -105,9 +106,13 @@ const columns = [
   },
 ];
 
-const mainCardClass = "rounded-2xl dark text-foreground bg-background py-10 px-10";
-
 const Result = () => {
+  useEffect(() => {
+    
+  }, []);
+
+  const mainCardClass = "rounded-2xl dark text-foreground bg-background py-10 px-10";
+
   return (
     <div className="flex flex-col">
       {/*<div className="dark text-foreground bg-background">*/}

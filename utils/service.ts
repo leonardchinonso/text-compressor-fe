@@ -1,9 +1,14 @@
 export interface BenchmarkRequest {
-    file_path: string;
-    algorithm: string;
+    text: string;
+    multithread: boolean;
 }
 
 export interface BenchmarkResponse {
+    algorithm: string;
+    encoded: string;
+    decoded: string;
+    time_taken: string;
     bit_rate: string;
     compression_ratio: string;
+    memory_used: string;
 }

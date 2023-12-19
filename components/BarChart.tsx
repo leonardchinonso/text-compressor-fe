@@ -106,7 +106,7 @@ const BarChart = () => {
             labels: Algorithms,
             datasets: [{
                 label: 'mb/s',
-                data: [3.75, 1.05, 3, 0.5],
+                data: [3.75, 1.05, 3, 0.5, 1.7],
                 borderColor: 'rgb(19,19,19)',
                 backgroundColor: 'rgba(125,0,166,0.7)',
             }]
@@ -119,7 +119,7 @@ const BarChart = () => {
             labels: Algorithms,
             datasets: [{
                 label: 'ms',
-                data: [40390, 34300, 78933, 19000],
+                data: [40390, 34300, 78933, 19000, 23900],
                 borderColor: 'rgb(19,19,19)',
                 backgroundColor: 'rgba(166,69,0,0.7)',
             }]
@@ -132,7 +132,7 @@ const BarChart = () => {
             labels: Algorithms,
             datasets: [{
                 label: 'ms',
-                data: [23700, 12400, 20000, 23700],
+                data: [23700, 12400, 20000, 23700, 57000],
                 borderColor: 'rgb(19,19,19)',
                 backgroundColor: 'rgba(0,166,58,0.7)',
             }]
@@ -145,7 +145,7 @@ const BarChart = () => {
             labels: Algorithms,
             datasets: [{
                 label: 'KB',
-                data: [751, 500, 1251, 1024],
+                data: [751, 500, 1251, 1024, 400],
                 borderColor: 'rgb(19,19,19)',
                 backgroundColor: 'rgba(0,116,166,0.7)',
             }]
