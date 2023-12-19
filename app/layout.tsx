@@ -3,6 +3,7 @@ import './globals.css'
 import Navbar from '@/components/Navbar';
 import Footer from "@/components/Footer";
 import {NextUIProvider} from "@nextui-org/react";
+import CompressionContextProvider from "../context/context";
 
 export default function RootLayout({
   children,
@@ -12,11 +13,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-      <Navbar/>
-      <NextUIProvider>
-          <main>{children}</main>
-      </NextUIProvider>
-      <Footer/>
+        <Navbar/>
+        <NextUIProvider>
+          <CompressionContextProvider>
+            <main>{children}</main>
+          </CompressionContextProvider>
+        </NextUIProvider>
+        <Footer/>
       </body>
     </html>
   )
