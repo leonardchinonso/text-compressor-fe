@@ -15,17 +15,18 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import LoadingDots from '@/components/ui/loadingdots';
-import { Algorithm } from '@/components/Algorithm';
 import { useRouter } from 'next/navigation';
 import {router} from "next/client";
-import {BenchmarkRequest, BenchmarkResponse} from "@/utils/service";
-import {HuffmanEncoding, Algorithms} from "@/utils/utils";
+import {BenchmarkRequest, BenchmarkResponse, intoCompressionMetrics} from "@/utils/service";
 import { json } from 'stream/consumers';
 // import { toast, Toaster } from 'react-hot-toast';
+import {CompressionContext} from "../context/context";
+import { CompressionContextType } from '@/type';
+
 
 const generateFormSchema = z.object({
   text: z.string().min(1),
@@ -46,78 +47,11 @@ const Body = ({
   modelLatency?: number;
   id?: string;
 }) => {
-  const [responseData, setResponseData] = useState(null);
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [response, setResponse] = useState<BenchmarkResponse | null>(null);
-  // const [submittedURL, setSubmittedURL] = useState<string | null>(null);
-
-  const router = useRouter();
-
-  const form = useForm<GenerateFormValues>({
-    resolver: zodResolver(generateFormSchema),
-    mode: 'onChange',
-
-    // Set default values so that the form inputs are controlled components.
-    defaultValues: {
-      text: '',
-    },
-  });
-
-  // useEffect(() => {
-  //   const url = '/api/generate';
-
-  //   const singleThreadRequest: BenchmarkRequest = {
-  //     text: values.text,
-  //     multithread: false,
-  //   }
-
-  //   // handleSubmit handles the submit event of the form
-  //     const handleSubmit = useCallback(
-  //       async (values: GenerateFormValues) => {
-  //         // set the defaults for all values
-  //         setIsLoading(true);
-  //         setResponse(null);
-
-  //         try {
-  //           // create a request for the benchmarking
-  //           const request: BenchmarkRequest = {
-  //             text: values.text,
-  //             multithread: false,
-  //           };
-  //           const response = await fetch('/api/generate', {
-  //             method: 'POST',
-  //             body: JSON.stringify(request),
-  //           });
-
-  //           // Handle API errors.
-  //         if (!response.ok || response.status !== 200) {
-  //           const text = await response.text();
-  //           throw new Error(
-  //             `Failed to retrieve benchmark metrics: ${response.status}, ${text}`,
-  //           );
-  //         }
-
-  //         const data = await response.json();
-  //         setResponseData(data);
-
-  //         console.log("DATA: ", data);
-
-  //         router.push({
-  //           pathname: '/result',
-  //         });
-  //         } catch(error) {
-  //           if (error instanceof Error) {
-  //             setError(error);
-  //           }
-  //         }
-  //         finally {
-  //           setIsLoading(false);
-  //         }
-  //       },
-  //       [router],
-  //   );
-  // }, []);
+  const { updateCompressionMetrics } = useContext(CompressionContext) as CompressionContextType;
 
   // handleSubmit handles the submit event of the form
   const handleSubmit = useCallback(
@@ -145,14 +79,18 @@ const Body = ({
           );
         }
 
-        const data = await response.json();
-        setResponseData(data);
+        const httpResponse = await response.json();
+        if (httpResponse.status_code != 200) {
+          throw new Error(
+            `Failed to retrieve benchmark metrics, received error code: ${httpResponse.status_code}`,
+          );
+        }
 
-        console.log("DATA: ", data);
+        const data: BenchmarkResponse[] = httpResponse.data;
+        const compressionMetrics = intoCompressionMetrics(data);
+        console.log("Compression Metrics: ", compressionMetrics);
+        updateCompressionMetrics(compressionMetrics);
 
-        // router.push({
-        //   pathname: '/result',
-        // });
         router.push('/result');
         } catch(error) {
           if (error instanceof Error) {
@@ -167,11 +105,15 @@ const Body = ({
       [router],
   );
 
-  // const handleSubmit = useCallback(
-  //   async () => {
-  //     router.push('/result')
-  //   }, [router]
-  // );
+  const form = useForm<GenerateFormValues>({
+    resolver: zodResolver(generateFormSchema),
+    mode: 'onChange',
+
+    // Set default values so that the form inputs are controlled components.
+    defaultValues: {
+      text: '',
+    },
+  });
 
   return (
     <div className="light flex justify-center items-center flex-col w-full lg:p-0 p-4 sm:mb-28 mb-0">

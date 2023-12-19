@@ -11,42 +11,11 @@ import {
 } from "@nextui-org/react";
 import {Tabs, Tab, Switch, Card, CardBody} from "@nextui-org/react";
 import BarChart from "@/components/BarChart";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
+import { CompressionContext } from "@/context/context";
+import { CompressionContextType } from "@/type";
+import { formatCompressionMetrics } from "@/utils/service";
 
-const rowsSingle = [
-  {
-    key: "1",
-    algorithm: "Huffman Encoding",
-    compression_time: "40390ms",
-    decompression_time: "23700ms",
-    bit_rate: "3.75mb/s",
-    memory_usage: "751KB",
-  },
-  {
-    key: "2",
-    algorithm: "Burrows-Wheeler Transform",
-    compression_time: "34300ms",
-    decompression_time: "12400ms",
-    bit_rate: "1.05mb/s",
-    memory_usage: "500KB",
-  },
-  {
-    key: "3",
-    algorithm: "Lempel Ziv Welch",
-    compression_time: "78933ms",
-    decompression_time: "20000ms",
-    bit_rate: "3mb/s",
-    memory_usage: "1251KB",
-  },
-  {
-    key: "4",
-    algorithm: "Run Length Encoding",
-    compression_time: "19000ms",
-    decompression_time: "23700ms",
-    bit_rate: "0.5mb/s",
-    memory_usage: "1024KB",
-  },
-];
 
 const rowsMulti = [
   {
@@ -89,35 +58,31 @@ const columns = [
     label: "ALGORITHM",
   },
   {
-    key: "compression_time",
+    key: "timeTaken",
     label: "COMPRESSION TIME",
   },
   {
-    key: "decompression_time",
-    label: "DECOMPRESSION TIME",
+    key: "compressionRatio",
+    label: "COMPRESSION RATIO",
   },
   {
-    key: "bit_rate",
+    key: "bitRate",
     label: "BIT RATE",
   },
   {
-    key: "memory_usage",
-    label: "MEMORY USAGE",
+    key: "memoryUsed",
+    label: "MEMORY USED",
   },
 ];
 
 const Result = () => {
-  useEffect(() => {
-    
-  }, []);
+  let { compressionMetrics } = useContext(CompressionContext) as CompressionContextType;
+  compressionMetrics = formatCompressionMetrics(compressionMetrics);
 
   const mainCardClass = "rounded-2xl dark text-foreground bg-background py-10 px-10";
 
   return (
     <div className="flex flex-col">
-      {/*<div className="dark text-foreground bg-background">*/}
-      {/*  <Switch defaultSelected aria-label="Singlethreaded"/>*/}
-      {/*</div>*/}
       <Tabs className="dark text-foreground bg-background justify-between" aria-label="Options" size="lg" color="default">
         <Tab key="single" title="Single Threaded">
           <Card>
@@ -129,7 +94,7 @@ const Result = () => {
                         <TableColumn key={column.key}>{column.label}</TableColumn>
                     )}
                   </TableHeader>
-                  <TableBody items={rowsSingle}>
+                  <TableBody items={compressionMetrics}>
                     {(item) => (
                         <TableRow key={item.key}>
                           {(columnKey) => (
