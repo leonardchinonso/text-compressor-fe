@@ -25,7 +25,7 @@ import {BenchmarkRequest, BenchmarkResponse, intoCompressionMetrics} from "@/uti
 import { json } from 'stream/consumers';
 // import { toast, Toaster } from 'react-hot-toast';
 import {CompressionContext} from "../context/context";
-import { CompressionContextType } from '@/type';
+import { CompressionContextType, ICompressionMetric, ICompressionMetricState } from '@/type';
 
 
 const generateFormSchema = z.object({
@@ -34,19 +34,75 @@ const generateFormSchema = z.object({
 
 type GenerateFormValues = z.infer<typeof generateFormSchema>;
 
-const Body = ({
-  imageUrl,
-  prompt,
-  redirectUrl,
-  modelLatency,
-  id,
-}: {
-  imageUrl?: string;
-  prompt?: string;
-  redirectUrl?: string;
-  modelLatency?: number;
-  id?: string;
-}) => {
+
+interface CompressionInfo {
+  data: ICompressionMetric[]
+  error: Error | null
+  errorMessage: string
+  statusCode: number
+}
+
+async function getSingleThreadMetrics(values: GenerateFormValues): Promise<CompressionInfo> {
+  const request: BenchmarkRequest = {
+    text: values.text,
+    multithread: false,
+  }
+  return getMetrics(request)
+}
+
+async function getMultiThreadMetrics(values: GenerateFormValues): Promise<CompressionInfo> {
+  const request: BenchmarkRequest = {
+    text: values.text,
+    multithread: true,
+  }
+  return getMetrics(request)
+}
+
+
+async function getMetrics(request: BenchmarkRequest): Promise<CompressionInfo> {
+  let compressionInfo: CompressionInfo = {
+    data: [],
+    error: null,
+    errorMessage: '',
+    statusCode: 200
+  }
+
+  try {
+    const response = await fetch('/api/generate', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+
+    // Handle API errors.
+  if (!response.ok || response.status !== 200) {
+    const text = await response.text();
+    let msg = `Failed to retrieve benchmark metrics: ${response.status}, ${text}`;
+    compressionInfo.errorMessage = msg;
+    compressionInfo.statusCode = response.status;
+    throw new Error(msg);
+  }
+
+  const httpResponse = await response.json();
+  if (httpResponse.status_code != 200) {
+    let msg = `Failed to retrieve benchmark metrics, received error code: ${httpResponse.status_code}`;
+    compressionInfo.errorMessage = msg;
+    compressionInfo.statusCode = httpResponse.status_code;
+    throw new Error(msg);
+  }
+
+  const data: BenchmarkResponse[] = httpResponse.data;
+  compressionInfo.data = intoCompressionMetrics(data);
+  console.log("Single Thread Compression Metrics: ", compressionInfo.data);
+
+  } catch(error) {
+    return compressionInfo;
+  }
+
+  return compressionInfo;
+}
+
+
+const Body = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -55,43 +111,29 @@ const Body = ({
 
   // handleSubmit handles the submit event of the form
   const handleSubmit = useCallback(
-      async (values: GenerateFormValues) => {
+     async (values: GenerateFormValues) => {
         // set the defaults for all values
         setIsLoading(true);
         setResponse(null);
 
         try {
-          // create a request for the benchmarking
-          const request: BenchmarkRequest = {
-            text: values.text,
-            multithread: false,
-          };
-          const response = await fetch('/api/generate', {
-            method: 'POST',
-            body: JSON.stringify(request),
-          });
+          const singleThreadCompressionData = await getSingleThreadMetrics(values);
+          const multiThreadCompressionData = await getMultiThreadMetrics(values);
 
-          // Handle API errors.
-        if (!response.ok || response.status !== 200) {
-          const text = await response.text();
-          throw new Error(
-            `Failed to retrieve benchmark metrics: ${response.status}, ${text}`,
-          );
-        }
+          if (singleThreadCompressionData.error || multiThreadCompressionData.error) {
+            throw new Error(
+              singleThreadCompressionData.error ? singleThreadCompressionData.errorMessage : multiThreadCompressionData.errorMessage
+            );
+          }
 
-        const httpResponse = await response.json();
-        if (httpResponse.status_code != 200) {
-          throw new Error(
-            `Failed to retrieve benchmark metrics, received error code: ${httpResponse.status_code}`,
-          );
-        }
+          const compressionMetrics: ICompressionMetricState = {
+            singleThreadMetrics: singleThreadCompressionData.data,
+            multiThreadMetrics: multiThreadCompressionData.data
+          }
 
-        const data: BenchmarkResponse[] = httpResponse.data;
-        const compressionMetrics = intoCompressionMetrics(data);
-        console.log("Compression Metrics: ", compressionMetrics);
-        updateCompressionMetrics(compressionMetrics);
+          updateCompressionMetrics(compressionMetrics);
 
-        router.push('/result');
+          router.push('/result');
         } catch(error) {
           if (error instanceof Error) {
             setError(error);

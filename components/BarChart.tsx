@@ -12,7 +12,7 @@ import {
 import * as _ from "lodash";
 import { computeDatasets, IBarchart } from '@/utils/barChart';
 import { CompressionContext } from '@/context/context';
-import { CompressionContextType } from '@/type';
+import { CompressionContextType, ICompressionMetric } from '@/type';
 
 ChartJS.register(
     CategoryScale,
@@ -32,10 +32,13 @@ interface ChartOptions {
     responsive: boolean
 }
 
-const BarChart = () => {
+const BarChart = ({threadType}: {threadType: "single" | "multi"}) => {
     const [chartsData, setChartsData] = useState<IBarchart[] | null>(null);
     const [chartOptions, setChartOptions] = useState<ChartOptions[]>([]);
     let { compressionMetrics } = useContext(CompressionContext) as CompressionContextType;
+
+    let serverChartsData: IBarchart[] = [];
+    threadType === "single" ? serverChartsData = computeDatasets(compressionMetrics.singleThreadMetrics) : computeDatasets(compressionMetrics.multiThreadMetrics);
 
     const defaultOpts: ChartOptions = {
         plugins: {
@@ -50,8 +53,6 @@ const BarChart = () => {
         maintainAspectRatio: true,
         responsive: true
     }
-    
-    const serverChartsData = computeDatasets(compressionMetrics);
 
     // set chart options
     const chartOpts: ChartOptions[] = [];
@@ -61,7 +62,11 @@ const BarChart = () => {
         chartOpts.push(opts);
     });
 
+    // setChartsData(serverChartsData);
+    // setChartOptions(chartOpts);
+
     useEffect(() => {
+        // console.log("SERVER CHARTS DATA: ", serverChartsData);
         setChartsData(serverChartsData)
         setChartOptions(chartOpts)
     }, [])
