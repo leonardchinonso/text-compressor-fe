@@ -11,6 +11,11 @@ import { CompressionContextType, ICompressionMetric } from "../type";
 //   setCompressionMetricState: React.Dispatch<React.SetStateAction<CompressionMetricState>>;
 // }
 
+const compressionContext: CompressionContextType = {
+  compressionMetrics: [],
+  updateCompressionMetrics: ([]) => {}
+};
+
 export const CompressionContext = React.createContext<CompressionContextType | null>(null);
 
 // const CompressionMetricData = createContext(initialState);

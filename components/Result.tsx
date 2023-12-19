@@ -77,6 +77,7 @@ const columns = [
 
 const Result = () => {
   let { compressionMetrics } = useContext(CompressionContext) as CompressionContextType;
+  console.log("Second Compression Metrics: ", compressionMetrics);
   compressionMetrics = formatCompressionMetrics(compressionMetrics);
 
   const mainCardClass = "rounded-2xl dark text-foreground bg-background py-10 px-10";
