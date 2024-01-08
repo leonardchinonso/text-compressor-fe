@@ -19,6 +19,8 @@ function intoCompressionMetric(response: BenchmarkResponse, index: number): ICom
     return {
         key: index.toString(),
         algorithm: response.algorithm,
+        encoded: response.encoded,
+        decoded: response.decoded,
         timeTaken: response.time_taken,
         bitRate: response.bit_rate,
         compressionRatio: response.compression_ratio,

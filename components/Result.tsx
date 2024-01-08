@@ -18,41 +18,6 @@ import { CompressionContextType } from "@/type";
 import { formatCompressionMetrics } from "@/utils/service";
 
 
-const rowsMulti = [
-  {
-    key: "1",
-    algorithm: "Huffman Encoding",
-    compression_time: "324ms",
-    decompression_time: "23700ms",
-    bit_rate: "3.75mb/s",
-    memory_usage: "751KB",
-  },
-  {
-    key: "2",
-    algorithm: "Burrows-Wheeler Transform",
-    compression_time: "34300ms",
-    decompression_time: "12400ms",
-    bit_rate: "1.05mb/s",
-    memory_usage: "500KB",
-  },
-  {
-    key: "3",
-    algorithm: "Lempel Ziv Welch",
-    compression_time: "78933ms",
-    decompression_time: "20000ms",
-    bit_rate: "3mb/s",
-    memory_usage: "1251KB",
-  },
-  {
-    key: "4",
-    algorithm: "Run Length Encoding",
-    compression_time: "19000ms",
-    decompression_time: "23700ms",
-    bit_rate: "0.5mb/s",
-    memory_usage: "1024KB",
-  },
-];
-
 const columns = [
   {
     key: "algorithm",
@@ -77,7 +42,6 @@ const columns = [
 ];
 
 const Result = () => {
-  console.log("RE-RENDERING RESULT");
   const [selected, setSelected] = useState<"single" | "multi">("single");
   let { compressionMetrics } = useContext(CompressionContext) as CompressionContextType;
 
@@ -89,7 +53,6 @@ const Result = () => {
   const mainCardClass = "rounded-2xl dark text-foreground bg-background py-10 px-10";
 
   const onSelectChange = (selected: "single" | "multi") => {
-    console.log("CHANGING SELECTED: ", selected);
     setSelected(selected);
   }
 

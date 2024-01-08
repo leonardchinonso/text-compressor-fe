@@ -92,7 +92,6 @@ async function getMetrics(request: BenchmarkRequest): Promise<CompressionInfo> {
 
   const data: BenchmarkResponse[] = httpResponse.data;
   compressionInfo.data = intoCompressionMetrics(data);
-  console.log("Single Thread Compression Metrics: ", compressionInfo.data);
 
   } catch(error) {
     return compressionInfo;
@@ -129,11 +128,11 @@ const Body = () => {
           const compressionMetrics: ICompressionMetricState = {
             singleThreadMetrics: singleThreadCompressionData.data,
             multiThreadMetrics: multiThreadCompressionData.data
-          }
+          };
 
           updateCompressionMetrics(compressionMetrics);
 
-          router.push('/result');
+          router.push('/compression_comparison');
         } catch(error) {
           if (error instanceof Error) {
             setError(error);
@@ -172,7 +171,7 @@ const Body = () => {
                     <FormItem>
                       <FormLabel>Input Text</FormLabel>
                       <FormControl>
-                        <Input placeholder="Lorem Ipsum..." {...field} />
+                        <Textarea style={{width: "1000px", height: "600px"}} placeholder="Lorem Ipsum..." {...field}></Textarea>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -181,7 +180,7 @@ const Body = () => {
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="inline-flex justify-center
+                  className="inline-flex justify-left
                  max-w-[200px] mx-auto w-full"
                 >
                   {isLoading ? (

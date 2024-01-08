@@ -62,11 +62,7 @@ const BarChart = ({threadType}: {threadType: "single" | "multi"}) => {
         chartOpts.push(opts);
     });
 
-    // setChartsData(serverChartsData);
-    // setChartOptions(chartOpts);
-
     useEffect(() => {
-        // console.log("SERVER CHARTS DATA: ", serverChartsData);
         setChartsData(serverChartsData)
         setChartOptions(chartOpts)
     }, [])

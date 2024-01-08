@@ -1,19 +1,8 @@
 import React, { createContext, useContext, useState } from "react";
 import { CompressionContextType, ICompressionMetric, ICompressionMetricState } from "../type";
 
-// const initialState = {
-//   compressionMetricState: {} as CompressionMetricState,
-//   setCompressionMetricState: (s: CompressionMetricState) => void,
-// }
-
-// interface IContext {
-//   compressionMetricState: CompressionMetricState;
-//   setCompressionMetricState: React.Dispatch<React.SetStateAction<CompressionMetricState>>;
-// }
 
 export const CompressionContext = React.createContext<CompressionContextType | null>(null);
-
-// const CompressionMetricData = createContext(initialState);
 
 const CompressionContextProvider: React.FC<React.ReactNode> = ({ children }) => {
     const [compressionMetrics, setCompressionMetrics] = useState<(ICompressionMetricState)>({
@@ -21,6 +10,8 @@ const CompressionContextProvider: React.FC<React.ReactNode> = ({ children }) => 
         {
           key: "1",
           algorithm: "Huffman Encoding",
+          encoded: "abcdef",
+          decoded: "010111",
           compressionRatio: "1.57783",
           timeTaken: "40390ms",
           bitRate: "3.75mb/s",
@@ -29,6 +20,8 @@ const CompressionContextProvider: React.FC<React.ReactNode> = ({ children }) => 
         {
           key: "2",
           algorithm: "Burrows-Wheeler Transform",
+          encoded: "abcdef",
+          decoded: "fbadec$",
           compressionRatio: "2.2948",
           timeTaken: "34300ms",
           bitRate: "1.05mb/s",
@@ -39,6 +32,8 @@ const CompressionContextProvider: React.FC<React.ReactNode> = ({ children }) => 
         {
           key: "1",
           algorithm: "Huffman Encoding",
+          encoded: "abcdef",
+          decoded: "010111",
           compressionRatio: "1.57783",
           timeTaken: "40390ms",
           bitRate: "3.75mb/s",
@@ -48,6 +43,8 @@ const CompressionContextProvider: React.FC<React.ReactNode> = ({ children }) => 
           key: "2",
           algorithm: "Burrows-Wheeler Transform",
           compressionRatio: "2.2948",
+          encoded: "abcdef",
+          decoded: "fbadec$",
           timeTaken: "34300ms",
           bitRate: "1.05mb/s",
           memoryUsed: "500KB",

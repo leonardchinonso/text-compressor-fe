@@ -1,6 +1,8 @@
 interface ICompressionMetric {
     key: string
     algorithm: string
+    encoded: string,
+    decoded: string,
     timeTaken: string
     bitRate: string
     compressionRatio: string
